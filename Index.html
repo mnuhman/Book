@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Book Fair Catalogue</title>
+  <style>
+    /* ============================================================
+       CSS Reset & Base
+       ============================================================ */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --primary: #2c3e50;
+      --primary-light: #34495e;
+      --accent: #e67e22;
+      --accent-hover: #d35400;
+      --bg: #f5f6fa;
+      --card-bg: #ffffff;
+      --text: #2c3e50;
+      --text-light: #7f8c8d;
+      --border: #e1e4e8;
+      --shadow: 0 2px 8px rgba(0,0,0,0.08);
+      --shadow-hover: 0 4px 16px rgba(0,0,0,0.12);
+      --success: #27ae60;
+      --danger: #e74c3c;
+      --warning: #f39c12;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ============================================================
+       Header
+       ============================================================ */
+    .header {
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: #fff;
+      padding: 20px 16px;
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+    }
+
+    .header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .header .subtitle {
+      font-size: 0.85rem;
+      opacity: 0.85;
+      font-weight: 400;
+    }
+
+    /* ============================================================
+       Search & Filter Container
+       ============================================================ */
+    .search-container {
+      padding: 16px;
+      background: var(--card-bg);
+      position: sticky;
+      top: 78px;
+      z-index: 99;
+      box-shadow: var(--shadow);
+    }
+
+    .search-box-wrapper {
+      position: relative;
+      margin-bottom: 12px;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.2rem;
+      color: var(--text-light);
+      pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 14px 44px 14px 44px;
+      font-size: 1rem;
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg);
+      color: var(--text);
+      transition: border-color 0.2s, box-shadow 0.2s;
+      font-family: var(--font);
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(230,126,34,0.15);
+    }
+
+    .search-input::placeholder {
+      color: #b0b8c1;
+    }
+
+    .clear-btn {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: var(--text-light);
+      color: #fff;
+      border: none;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      font-size: 1rem;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+
+    .clear-btn:hover {
+      background: var(--danger);
+    }
+
+    .clear-btn.visible {
+      display: flex;
+    }
+
+    .filter-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .filter-select {
+      flex: 1;
+      min-width: 120px;
+      padding: 10px 12px;
+      font-size: 0.9rem;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg);
+      color: var(--text);
+      cursor: pointer;
+      font-family: var(--font);
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237f8c8d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      background-size: 18px;
+      padding-right: 32px;
+    }
+
+    .filter-select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    /* ============================================================
+       Results Info Bar
+       ============================================================ */
+    .results-info {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      font-size: 0.85rem;
+      color: var(--text-light);
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .results-count {
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    /* ============================================================
+       Loading & Messages
+       ============================================================ */
+    .loading-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      color: var(--text-light);
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 16px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-light);
+    }
+
+    .no-results .icon {
+      font-size: 3rem;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .no-results p {
+      font-size: 1.1rem;
+    }
+
+    .error-message {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--danger);
+      background: #fdf2f2;
+      margin: 16px;
+      border-radius: var(--radius);
+      border: 1px solid #f5c6cb;
+    }
+
+    /* ============================================================
+       Book Cards Grid
+       ============================================================ */
+    .book-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+      padding: 16px;
+    }
+
+    /* Single column on small phones */
+    @media (max-width: 400px) {
+      .book-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .book-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      transition: box-shadow 0.2s, transform 0.2s;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .book-card:hover {
+      box-shadow: var(--shadow-hover);
+      transform: translateY(-2px);
+    }
+
+    .book-card-cover {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      background: linear-gradient(135deg, #dfe6e9, #b2bec3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .cover-placeholder {
+      width: 100%;
+      height: 200px;
+      background: linear-gradient(135deg, #dfe6e9, #b2bec3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      color: #636e72;
+    }
+
+    .cover-placeholder .book-icon {
+      font-size: 3rem;
+      margin-bottom: 8px;
+      opacity: 0.6;
+    }
+
+    .cover-placeholder span {
+      font-size: 0.8rem;
+      opacity: 0.7;
+    }
+
+    .book-card-body {
+      padding: 16px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .book-name {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 6px;
+      line-height: 1.4;
+    }
+
+    .book-author {
+      font-size: 0.9rem;
+      color: var(--text-light);
+      margin-bottom: 8px;
+      font-style: italic;
+    }
+
+    .book-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .meta-tag {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      background: #eef2f7;
+      color: var(--primary-light);
+    }
+
+    .meta-tag.category {
+      background: #fef3e2;
+      color: #c05610;
+    }
+
+    .meta-tag.language {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    .meta-tag.publisher {
+      background: #e3f2fd;
+      color: #1565c0;
+    }
+
+    .book-pricing {
+      margin-top: auto;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .original-price {
+      font-size: 1rem;
+      color: var(--text-light);
+      text-decoration: line-through;
+    }
+
+    .discount-price {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--danger);
+    }
+
+    .normal-price {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .book-location {
+      display: flex;
+      gap: 12px;
+      margin-top: 10px;
+      font-size: 0.82rem;
+      color: var(--text-light);
+    }
+
+    .location-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .location-item .loc-icon {
+      font-size: 0.9rem;
+    }
+
+    .stock-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-top: 8px;
+    }
+
+    .stock-badge.in-stock {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    .stock-badge.out-of-stock {
+      background: #fce4ec;
+      color: #c62828;
+    }
+
+    /* ============================================================
+       Footer
+       ============================================================ */
+    .footer {
+      text-align: center;
+      padding: 24px 16px;
+      color: var(--text-light);
+      font-size: 0.8rem;
+    }
+
+    /* ============================================================
+       Responsive
+       ============================================================ */
+    @media (max-width: 600px) {
+      .header h1 {
+        font-size: 1.25rem;
+      }
+      .search-container {
+        padding: 12px;
+      }
+      .filter-row {
+        flex-direction: column;
+      }
+      .filter-select {
+        min-width: 100%;
+      }
+      .book-grid {
+        padding: 12px;
+        gap: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="header">
+    <h1>&#128218; Book Fair Catalogue</h1>
+    <div class="subtitle">Browse &amp; search our collection</div>
+  </div>
+
+  <!-- Search & Filters -->
+  <div class="search-container">
+    <div class="search-box-wrapper">
+      <span class="search-icon">&#128269;</span>
+      <input
+        type="text"
+        id="searchInput"
+        class="search-input"
+        placeholder="Search by book name, author, category, publisher..."
+        autocomplete="off"
+        oninput="onSearch()"
+      >
+      <button id="clearBtn" class="clear-btn" onclick="clearSearch()" title="Clear search">&#10005;</button>
+    </div>
+
+    <div class="filter-row">
+      <select id="categoryFilter" class="filter-select" onchange="onSearch()">
+        <option value="">All Categories</option>
+      </select>
+      <select id="languageFilter" class="filter-select" onchange="onSearch()">
+        <option value="">All Languages</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Results info -->
+  <div class="results-info">
+    <span id="resultsCount" class="results-count">Loading...</span>
+  </div>
+
+  <!-- Book Grid -->
+  <div id="bookGrid" class="book-grid">
+    <div class="loading-container">
+      <div class="spinner"></div>
+      <p>Loading books...</p>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    &copy; <span id="currentYear"></span> Book Fair Catalogue &middot; Powered by Google Apps Script
+  </div>
+
+  <!-- ============================================================
+       JavaScript - All logic inline (no external dependencies)
+       ============================================================ -->
+  <script>
+    // -----------------------------------------------------------
+    // Global state
+    // -----------------------------------------------------------
+    var allBooks = [];
+    var categories = [];
+    var languages = [];
+
+    // -----------------------------------------------------------
+    // On page load: fetch books from Google Sheet
+    // -----------------------------------------------------------
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('currentYear').textContent = new Date().getFullYear();
+      loadBooks();
+    });
+
+    function loadBooks() {
+      google.script.run
+        .withSuccessHandler(onBooksLoaded)
+        .withFailureHandler(onLoadError)
+        .getBooks();
+    }
+
+    function onBooksLoaded(data) {
+      if (data && data.error) {
+        showError(data.error);
+        return;
+      }
+
+      allBooks = data || [];
+
+      // Extract unique categories and languages for filter dropdowns
+      var catSet = {};
+      var langSet = {};
+      allBooks.forEach(function(book) {
+        if (book.category) catSet[book.category] = true;
+        if (book.language) langSet[book.language] = true;
+      });
+      categories = Object.keys(catSet).sort();
+      languages = Object.keys(langSet).sort();
+
+      populateFilters();
+      renderBooks(allBooks);
+    }
+
+    function onLoadError(err) {
+      showError('Failed to load books. Please check your connection and try again. Error: ' + (err.message || err));
+    }
+
+    // -----------------------------------------------------------
+    // Populate filter dropdowns dynamically
+    // -----------------------------------------------------------
+    function populateFilters() {
+      var catSelect = document.getElementById('categoryFilter');
+      var langSelect = document.getElementById('languageFilter');
+
+      categories.forEach(function(cat) {
+        var opt = document.createElement('option');
+        opt.value = cat;
+        opt.textContent = cat;
+        catSelect.appendChild(opt);
+      });
+
+      languages.forEach(function(lang) {
+        var opt = document.createElement('option');
+        opt.value = lang;
+        opt.textContent = lang;
+        langSelect.appendChild(opt);
+      });
+    }
+
+    // -----------------------------------------------------------
+    // Search logic - filters in real-time as user types
+    // -----------------------------------------------------------
+    function onSearch() {
+      var searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+      var categoryFilter = document.getElementById('categoryFilter').value;
+      var languageFilter = document.getElementById('languageFilter').value;
+
+      // Toggle clear button visibility
+      var clearBtn = document.getElementById('clearBtn');
+      if (searchTerm.length > 0 || categoryFilter !== '' || languageFilter !== '') {
+        clearBtn.classList.add('visible');
+      } else {
+        clearBtn.classList.remove('visible');
+      }
+
+      var filtered = allBooks.filter(function(book) {
+        // Category filter
+        if (categoryFilter && book.category !== categoryFilter) return false;
+
+        // Language filter
+        if (languageFilter && book.language !== languageFilter) return false;
+
+        // Search term match (case-insensitive; supports Malayalam & English)
+        if (searchTerm) {
+          var searchFields = [
+            (book.bookName || '').toLowerCase(),
+            (book.author || '').toLowerCase(),
+            (book.category || '').toLowerCase(),
+            (book.publisher || '').toLowerCase(),
+            (book.language || '').toLowerCase()
+          ];
+          var match = searchFields.some(function(field) {
+            return field.indexOf(searchTerm) !== -1;
+          });
+          if (!match) return false;
+        }
+
+        return true;
+      });
+
+      renderBooks(filtered);
+    }
+
+    function clearSearch() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('categoryFilter').value = '';
+      document.getElementById('languageFilter').value = '';
+      document.getElementById('clearBtn').classList.remove('visible');
+      renderBooks(allBooks);
+    }
+
+    // -----------------------------------------------------------
+    // Render book cards
+    // -----------------------------------------------------------
+    function renderBooks(books) {
+      var grid = document.getElementById('bookGrid');
+      var countEl = document.getElementById('resultsCount');
+
+      countEl.textContent = books.length + ' book' + (books.length !== 1 ? 's' : '') + ' found';
+
+      if (books.length === 0) {
+        grid.innerHTML = '<div class="no-results"><span class="icon">&#128214;</span><p>No books found</p><p style="font-size:0.85rem;margin-top:4px;">Try adjusting your search or filters.</p></div>';
+        return;
+      }
+
+      var html = '';
+      books.forEach(function(book) {
+        html += buildBookCard(book);
+      });
+      grid.innerHTML = html;
+    }
+
+    function buildBookCard(book) {
+      // Cover image or placeholder
+      var coverHtml;
+      if (book.coverImage && isValidUrl(book.coverImage)) {
+        coverHtml = '<img class="book-card-cover" src="' + escapeHtml(book.coverImage) + '" alt="Cover" loading="lazy" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';">' +
+                    '<div class="cover-placeholder" style="display:none;"><span class="book-icon">&#128213;</span><span>No Cover</span></div>';
+      } else {
+        coverHtml = '<div class="cover-placeholder"><span class="book-icon">&#128213;</span><span>No Cover</span></div>';
+      }
+
+      // Pricing
+      var pricingHtml;
+      if (book.discountPrice) {
+        pricingHtml = '<span class="original-price">' + escapeHtml(book.price) + '</span>' +
+                      '<span class="discount-price">' + escapeHtml(book.discountPrice) + '</span>';
+      } else {
+        pricingHtml = '<span class="normal-price">' + escapeHtml(book.price) + '</span>';
+      }
+
+      // Stock badge
+      var isAvailable = book.available && book.available.toLowerCase() === 'yes';
+      var stockHtml;
+      if (book.available && !isAvailable) {
+        stockHtml = '<span class="stock-badge out-of-stock">Out of Stock</span>';
+      } else {
+        stockHtml = '<span class="stock-badge in-stock">In Stock</span>';
+      }
+
+      // Location info (only show if present)
+      var locationHtml = '';
+      if (book.stallNo || book.shelfNo) {
+        locationHtml = '<div class="book-location">';
+        if (book.stallNo) {
+          locationHtml += '<span class="location-item"><span class="loc-icon">&#127978;</span> Stall ' + escapeHtml(book.stallNo) + '</span>';
+        }
+        if (book.shelfNo) {
+          locationHtml += '<span class="location-item"><span class="loc-icon">&#128451;</span> Shelf ' + escapeHtml(book.shelfNo) + '</span>';
+        }
+        locationHtml += '</div>';
+      }
+
+      // Meta tags
+      var metaHtml = '';
+      if (book.category) {
+        metaHtml += '<span class="meta-tag category">' + escapeHtml(book.category) + '</span>';
+      }
+      if (book.language) {
+        metaHtml += '<span class="meta-tag language">' + escapeHtml(book.language) + '</span>';
+      }
+      if (book.publisher) {
+        metaHtml += '<span class="meta-tag publisher">' + escapeHtml(book.publisher) + '</span>';
+      }
+
+      return '' +
+        '<div class="book-card">' +
+          coverHtml +
+          '<div class="book-card-body">' +
+            '<div class="book-name">' + escapeHtml(book.bookName) + '</div>' +
+            (book.author ? '<div class="book-author">by ' + escapeHtml(book.author) + '</div>' : '') +
+            '<div class="book-meta">' + metaHtml + '</div>' +
+            '<div class="book-pricing">' + pricingHtml + '</div>' +
+            stockHtml +
+            locationHtml +
+          '</div>' +
+        '</div>';
+    }
+
+    // -----------------------------------------------------------
+    // Helper: Validate URL
+    // -----------------------------------------------------------
+    function isValidUrl(str) {
+      if (!str) return false;
+      try {
+        new URL(str);
+        return true;
+      } catch (_) {
+        return false;
+      }
+    }
+
+    // -----------------------------------------------------------
+    // Helper: HTML escape
+    // -----------------------------------------------------------
+    function escapeHtml(str) {
+      if (!str) return '';
+      var div = document.createElement('div');
+      div.appendChild(document.createTextNode(str));
+      return div.innerHTML;
+    }
+
+    // -----------------------------------------------------------
+    // Show error
+    // -----------------------------------------------------------
+    function showError(msg) {
+      document.getElementById('bookGrid').innerHTML =
+        '<div class="error-message"><strong>Error:</strong> ' + escapeHtml(msg) + '</div>';
+      document.getElementById('resultsCount').textContent = 'Error loading books';
+    }
+  </script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"3279d41ec7804124a29acc6e692f9a2b","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>
